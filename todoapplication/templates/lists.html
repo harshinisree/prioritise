@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Lists · Prioritise{% endblock %}
+{% block content %}
+<div class="app">
+    <header class="page-head head-row">
+        <div>
+            <h1>All task lists</h1>
+            <p class="muted">One list per category. Tap a list to open it.</p>
+        </div>
+        <a class="btn ghost desk-only" href="{% url 'settings' %}">{% include 'icon.html' with name='sliders' %}Manage categories</a>
+    </header>
+
+    <div class="stack">
+        {% for c in categories %}
+        <a class="list-card" href="{% url 'list_detail' c.id %}" style="--c: {{ c.color }}">
+            <h3>{{ c.name }}</h3>
+            <p>{{ c.total }} task{{ c.total|pluralize }}</p>
+            <span class="pill">{{ c.completed }} completed</span>
+            <div class="progress"><span style="width: {% widthratio c.completed c.total 100 %}%"></span></div>
+            <span class="go">{% include 'icon.html' with name='arrow-up-right' %}</span>
+        </a>
+        {% endfor %}
+    </div>
+    <a class="btn ghost block mob-only" href="{% url 'settings' %}">{% include 'icon.html' with name='sliders' %}Manage categories</a>
+
+    {% include '_nav.html' with active='lists' %}
+</div>
+{% endblock %}

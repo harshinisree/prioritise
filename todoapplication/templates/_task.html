@@ -1,0 +1,46 @@
+<div class="task{% if t.shown_done %} done{% endif %}" data-priority="{{ t.priority }}" style="--c: {{ t.category.color }}">
+    <div class="task-inner">
+        <form method="post" action="{% url 'toggle_done' t.srno %}" class="toggle-form">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <input type="hidden" name="date" value="{{ view_day|date:'Y-m-d' }}">
+            <button class="check" type="submit" title="Mark as done">{% include 'icon.html' with name='check' %}</button>
+        </form>
+
+        <div class="task-main">
+            <div class="meta">
+                {% if t.repeat_daily %}
+                <span class="when">{% include 'icon.html' with name='repeat' %}Every day{% if t.end_date %} until {{ t.end_date|date:"j M" }}{% endif %}</span>
+                {% elif t.end_date %}
+                <span class="when{% if not t.shown_done and t.end_date < today %} late{% endif %}">
+                    {% include 'icon.html' with name='calendar' %}{{ t.due_date|date:"j M" }} → {{ t.end_date|date:"j M" }}
+                </span>
+                {% elif t.due_date and show_date %}
+                <span class="when{% if not t.shown_done and t.due_date < today %} late{% endif %}">
+                    {% include 'icon.html' with name='calendar' %}
+                    {% if t.due_date == today %}Today{% elif t.due_date == tomorrow %}Tomorrow{% elif t.due_date == yesterday %}Yesterday{% else %}{{ t.due_date|date:"D, j M" }}{% endif %}
+                </span>
+                {% endif %}
+                {% if t.due_time %}
+                <span class="when">{% include 'icon.html' with name='clock' %}{{ t.due_time|time:"g:i A" }}{% if t.end_time %} – {{ t.end_time|time:"g:i A" }}{% endif %}</span>
+                {% endif %}
+                {% if t.priority == 1 %}<span class="flag">{% include 'icon.html' with name='flag' %}High</span>{% endif %}
+            </div>
+            <div class="task-title">{{ t.title }}</div>
+        </div>
+
+        <span class="pill">{{ t.category.name }}</span>
+
+        <div class="more">
+            <button class="more-btn" type="button" aria-label="More options">{% include 'icon.html' with name='dots' %}</button>
+            <div class="menu">
+                <a href="{% url 'edit_todo' t.srno %}">{% include 'icon.html' with name='pencil' %}Edit</a>
+                <form method="post" action="{% url 'delete_todo' t.srno %}" class="delete-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <button type="submit">{% include 'icon.html' with name='trash' %}Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

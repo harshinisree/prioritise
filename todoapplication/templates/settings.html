@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Settings · Prioritise{% endblock %}
+{% block content %}
+<div class="app">
+    <header class="page-head">
+        <h1>Categories</h1>
+        <p class="muted">One colour per category. Colours already in use are hidden.</p>
+    </header>
+
+    <div class="split">
+        <form method="post" class="panel card">
+            {% csrf_token %}
+            <label class="field"><span>Name</span>
+                <input class="input" name="name" maxlength="30" placeholder="e.g. Work, Study, Family" required></label>
+            <div class="field"><span>Colour</span>
+                <div class="color-row">
+                    <input type="color" name="color" id="color" value="{{ default_color }}">
+                    <div class="presets">
+                        {% for hex in presets %}
+                        <button type="button" class="preset{% if forloop.first %} on{% endif %}" style="--c: {{ hex }}" data-color="{{ hex }}" title="{{ hex }}"></button>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <button class="btn" type="submit">{% include 'icon.html' with name='plus' %}Add category</button>
+        </form>
+
+        <div class="split-side">
+            <div class="cat-list card">
+                {% for c in categories %}
+                <div class="cat" style="--c: {{ c.color }}">
+                    <span class="swatch"></span>
+                    <span class="name">{{ c.name }}</span>
+                    <span class="muted">{{ c.n }} task{{ c.n|pluralize }}</span>
+                    <form method="post" action="{% url 'delete_category' c.id %}">
+                        {% csrf_token %}
+                        <button class="icon-btn danger" type="submit" title="Delete category">{% include 'icon.html' with name='trash' %}</button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="account">
+                <span class="avatar">{{ user.username|first }}</span>
+                <div><b>{{ user.username }}</b><p class="muted">{{ user.email }}</p></div>
+                <a class="btn ghost" href="{% url 'signout' %}">{% include 'icon.html' with name='logout' %}Log out</a>
+            </div>
+        </div>
+    </div>
+
+    {% include '_nav.html' with active='settings' %}
+</div>
+{% endblock %}

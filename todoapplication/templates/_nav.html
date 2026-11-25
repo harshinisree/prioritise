@@ -1,0 +1,27 @@
+{# Desktop (>= 1100px): sidebar with labels. Tablet (700-1099px): icon-only sidebar, labels as tooltips (data-label). Phone (< 700px): bottom nav. #}
+<aside class="sidebar">
+    <a class="brand side-brand" href="{% url 'todo' %}" data-label="Prioritise"><span class="logo">{% include 'icon.html' with name='check' %}</span><span class="side-label">Prioritise</span></a>
+
+    <nav class="side-links" aria-label="Main">
+        <a class="side-link{% if active == 'home' %} on{% endif %}" href="{% url 'todo' %}" data-label="Home">{% include 'icon.html' with name='grid' %}<span class="side-label">Home</span></a>
+        <a class="side-link{% if active == 'calendar' %} on{% endif %}" href="{% url 'calendar' %}" data-label="Calendar">{% include 'icon.html' with name='calendar' %}<span class="side-label">Calendar</span></a>
+        <a class="side-link{% if active == 'lists' %} on{% endif %}" href="{% url 'lists' %}" data-label="Lists">{% include 'icon.html' with name='layers' %}<span class="side-label">Lists</span></a>
+        <a class="side-link{% if active == 'settings' %} on{% endif %}" href="{% url 'settings' %}" data-label="Categories">{% include 'icon.html' with name='sliders' %}<span class="side-label">Categories</span></a>
+    </nav>
+
+    <div class="side-foot">
+        <div class="side-user" data-label="{{ user.username|title }}">
+            <span class="avatar">{{ user.username|first }}</span>
+            <div class="side-label"><b>{{ user.username|title }}</b>{% if user.email %}<small>{{ user.email }}</small>{% endif %}</div>
+        </div>
+        <a class="side-link logout" href="{% url 'signout' %}" data-label="Log out">{% include 'icon.html' with name='logout' %}<span class="side-label">Log out</span></a>
+    </div>
+</aside>
+
+<nav class="bottom-nav">
+    <a href="{% url 'todo' %}" class="{% if active == 'home' %}on{% endif %}" title="Home">{% include 'icon.html' with name='grid' %}</a>
+    <a href="{% url 'calendar' %}" class="{% if active == 'calendar' %}on{% endif %}" title="Calendar">{% include 'icon.html' with name='calendar' %}</a>
+    <a href="{% url 'todo' %}?add=1" class="fab" data-open-add title="Add task">{% include 'icon.html' with name='plus' %}</a>
+    <a href="{% url 'lists' %}" class="{% if active == 'lists' %}on{% endif %}" title="Lists">{% include 'icon.html' with name='layers' %}</a>
+    <a href="{% url 'settings' %}" class="{% if active == 'settings' %}on{% endif %}" title="Categories &amp; account">{% include 'icon.html' with name='sliders' %}</a>
+</nav>

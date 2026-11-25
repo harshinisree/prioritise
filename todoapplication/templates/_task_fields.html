@@ -1,0 +1,54 @@
+<label class="field"><span>Task</span>
+    <input class="input" type="text" name="title" value="{{ obj.title|default:'' }}" maxlength="100" placeholder="What needs doing?" required></label>
+
+<div class="field"><span>Category</span>
+    <div class="cat-pick" role="radiogroup" aria-label="Category">
+        {% for c in categories %}
+        <input type="radio" name="category" value="{{ c.id }}" id="{{ prefix }}c{{ c.id }}" required
+               {% if obj %}{% if obj.category_id == c.id %}checked{% endif %}{% elif forloop.first %}checked{% endif %}>
+        <label for="{{ prefix }}c{{ c.id }}" style="--c: {{ c.color }}"><i></i>{{ c.name }}</label>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="field"><span>Priority</span>
+    <div class="seg" role="radiogroup" aria-label="Priority">
+        <input type="radio" name="priority" value="1" id="{{ prefix }}p1" {% if obj.priority == 1 %}checked{% endif %}><label for="{{ prefix }}p1"><i style="background:var(--high)"></i>High</label>
+        <input type="radio" name="priority" value="2" id="{{ prefix }}p2" {% if not obj or obj.priority == 2 %}checked{% endif %}><label for="{{ prefix }}p2"><i style="background:var(--med)"></i>Medium</label>
+        <input type="radio" name="priority" value="3" id="{{ prefix }}p3" {% if obj.priority == 3 %}checked{% endif %}><label for="{{ prefix }}p3"><i style="background:var(--low)"></i>Low</label>
+    </div>
+</div>
+
+<div class="grid2">
+    <label class="field"><span>Start date</span>
+        <input class="input" type="date" name="due_date" value="{% if obj %}{{ obj.due_date|date:'Y-m-d' }}{% else %}{{ default_date|date:'Y-m-d' }}{% endif %}"></label>
+    <label class="field"><span>End date (optional)</span>
+        <input class="input" type="date" name="end_date" value="{{ obj.end_date|date:'Y-m-d' }}"></label>
+</div>
+{# Time picker (app.js, section 8). The two hidden inputs still send HH:MM (24-hour) as due_time / end_time. #}
+<div class="field tp" data-timepicker>
+    <span>Start time</span>
+    <input type="hidden" name="due_time" value="{{ obj.due_time|time:'H:i' }}" data-start>
+    <input type="hidden" name="end_time" value="{{ obj.end_time|time:'H:i' }}" data-end>
+    <button type="button" class="input tp-field tp-empty" aria-haspopup="dialog">{% include 'icon.html' with name='clock' %}<span class="tp-text">Add a start time</span></button>
+    <div class="tp-dur" hidden>
+        <span class="tp-dur-label">Duration</span>
+        <div class="tp-chips">
+            <button type="button" class="chip" data-min="15" aria-pressed="false">15 min</button>
+            <button type="button" class="chip" data-min="30" aria-pressed="false">30 min</button>
+            <button type="button" class="chip" data-min="45" aria-pressed="false">45 min</button>
+            <button type="button" class="chip" data-min="60" aria-pressed="false">1 hr</button>
+            <button type="button" class="chip" data-min="90" aria-pressed="false">1 hr 30 min</button>
+            <button type="button" class="chip" data-min="120" aria-pressed="false">2 hr</button>
+            <button type="button" class="chip" data-min="custom" aria-pressed="false">Custom</button>
+        </div>
+        <p class="tp-result" aria-live="polite"></p>
+        <p class="tp-note" hidden></p>
+    </div>
+</div>
+
+<label class="repeat-toggle">
+    <span class="repeat-toggle-text"><b>Repeat every day</b><small>Shows daily from the start date until the end date, or forever.</small></span>
+    <input type="checkbox" name="repeat_daily" value="1" {% if obj.repeat_daily %}checked{% endif %}>
+    <i class="repeat-toggle-track" aria-hidden="true"></i>
+</label>

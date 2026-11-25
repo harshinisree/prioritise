@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}Home · Prioritise{% endblock %}
+{% block content %}
+<div class="app">
+    <header class="topbar">
+        <div class="topbar-text">
+            <h1>Hello {{ user.username|title }},</h1>
+            <p class="muted">{% if counts.today %}You have {{ counts.today }} task{{ counts.today|pluralize }} to do today{% else %}Nothing due today. Nice.{% endif %}</p>
+        </div>
+        <a class="avatar" href="{% url 'settings' %}" title="Account">{{ user.username|first }}</a>
+        <form class="search" method="get">
+            <input type="search" name="q" value="{{ q }}" placeholder="Search tasks..." aria-label="Search tasks">
+            {% include 'icon.html' with name='search' %}
+        </form>
+        <a class="btn new-task" href="{% url 'todo' %}?add=1" data-open-add>{% include 'icon.html' with name='plus' %}New task</a>
+    </header>
+
+    <div class="tiles">
+        <a href="?view=today" class="tile t-today{% if view == 'today' and not q %} on{% endif %}">
+            <span class="tile-icon">{% include 'icon.html' with name='sun' %}</span>
+            <span class="tile-label">Today</span><b>{{ counts.today }}</b>
+        </a>
+        <a href="?view=scheduled" class="tile t-scheduled{% if view == 'scheduled' and not q %} on{% endif %}">
+            <span class="tile-icon">{% include 'icon.html' with name='calendar' %}</span>
+            <span class="tile-label">Scheduled</span><b>{{ counts.scheduled }}</b>
+        </a>
+        <a href="?view=all" class="tile t-all{% if view == 'all' and not q %} on{% endif %}">
+            <span class="tile-icon">{% include 'icon.html' with name='list' %}</span>
+            <span class="tile-label">All</span><b>{{ counts.all }}</b>
+        </a>
+        <a href="?view=overdue" class="tile t-overdue{% if view == 'overdue' and not q %} on{% endif %}">
+            <span class="tile-icon">{% include 'icon.html' with name='alert' %}</span>
+            <span class="tile-label">Overdue</span><b>{{ counts.overdue }}</b>
+        </a>
+    </div>
+
+    <div class="dash">
+        <section class="dash-main card">
+            <div class="card-head">
+                <h2 class="section">{% if q %}Results for "{{ q }}"{% elif view == 'today' %}Today's tasks{% else %}{{ view_label }} tasks{% endif %}</h2>
+                <span class="count">{{ tasks|length }} task{{ tasks|length|pluralize }}</span>
+            </div>
+            <div class="list">
+                {% for t in tasks %}
+                    {% include '_task.html' with show_date=show_dates %}
+                {% empty %}
+                    <div class="empty">{% if q %}No tasks match "{{ q }}".{% else %}Nothing here. Tap + to add a task.{% endif %}</div>
+                {% endfor %}
+            </div>
+        </section>
+
+        {# Right column: desktop only (hidden on mobile by CSS) #}
+        <aside class="dash-side">
+            <section class="card">
+                <div class="card-head">
+                    <h2 class="section">{{ today|date:"F Y" }}</h2>
+                    <a class="link-sm" href="{% url 'calendar' %}">Open calendar</a>
+                </div>
+                {# Seven day links are filled in by app.js from data-today (the view sends only today's date) #}
+                <div class="mini-week" data-mini-week data-today="{{ today|date:'Y-m-d' }}" data-base="{% url 'calendar' %}"></div>
+                <noscript><a class="link-sm" href="{% url 'calendar' %}">Open the calendar</a></noscript>
+            </section>
+
+            <section class="card">
+                <div class="card-head">
+                    <h2 class="section">Lists</h2>
+                    <a class="link-sm" href="{% url 'lists' %}">View all</a>
+                </div>
+                <div class="sum-list">
+                    {% for c in categories %}
+                    <a class="sum-row" href="{% url 'list_detail' c.id %}" style="--c: {{ c.color }}">
+                        <div class="sum-top">
+                            <i class="dot"></i><span class="sum-name">{{ c.name }}</span>
+                            <span class="sum-count">{{ c.completed }} / {{ c.total }}</span>
+                        </div>
+                        <div class="progress"><span style="width: {% widthratio c.completed c.total 100 %}%"></span></div>
+                    </a>
+                    {% empty %}
+                    <div class="empty">No lists yet.</div>
+                    {% endfor %}
+                </div>
+            </section>
+        </aside>
+    </div>
+
+    {% include '_nav.html' with active='home' %}
+</div>
+
+{% include '_add_sheet.html' %}
+
+{% if show_welcome %}
+<div class="modal" id="welcome" role="dialog" aria-modal="true">
+    <div class="welcome">
+        <p><span id="greet">Welcome</span>, {{ user.username|title }}.
+           {{ counts.today }} task{{ counts.today|pluralize }} today{% if counts.overdue %} · {{ counts.overdue }} overdue{% endif %}.</p>
+        <button class="btn" type="button" data-close>Let's go</button>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Edit task · Prioritise{% endblock %}
+{% block content %}
+<div class="app">
+    {# On desktop the Edit link opens this form in a modal (app.js). Opened directly, it shows as a centred card. #}
+    <div class="dialog-card">
+        <a class="back" href="{% url 'todo' %}">{% include 'icon.html' with name='back' %}Back</a>
+        <header class="page-head"><h1>Edit task</h1></header>
+        <form method="post" class="panel">
+            {% csrf_token %}
+            {% include '_task_fields.html' with prefix='e' %}
+            <div class="btn-row">
+                <a class="btn ghost" href="{% url 'todo' %}">Cancel</a>
+                <button class="btn" type="submit">Save changes</button>
+            </div>
+        </form>
+    </div>
+    {% include '_nav.html' %}
+</div>
+{% endblock %}

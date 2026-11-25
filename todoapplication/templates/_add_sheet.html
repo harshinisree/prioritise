@@ -1,0 +1,12 @@
+<div class="sheet-backdrop" id="add-sheet" hidden>
+    <form method="post" action="{% url 'todo' %}" class="sheet">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <div class="sheet-head">
+            <h2>New task</h2>
+            <button class="icon-btn" type="button" data-close-add aria-label="Close">{% include 'icon.html' with name='x' %}</button>
+        </div>
+        {% include '_task_fields.html' with prefix='a' %}
+        <button class="btn block" type="submit">{% include 'icon.html' with name='plus' %}Add task</button>
+    </form>
+</div>

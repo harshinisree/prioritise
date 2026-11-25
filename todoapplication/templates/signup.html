@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Sign up · Prioritise{% endblock %}
+{% block content %}
+<main class="auth">
+    <div class="auth-card">
+        <div class="brand"><span class="logo">{% include 'icon.html' with name='check' %}</span>Prioritise</div>
+        <h1>Create your account</h1>
+        <p class="muted">Plan less. Do the important things first.</p>
+        <form method="post">
+            {% csrf_token %}
+            <label class="field"><span>Username</span>
+                <input class="input" type="text" name="fnm" value="{{ fnm|default:'' }}" required autofocus></label>
+            <label class="field"><span>Email</span>
+                <input class="input" type="email" name="email" value="{{ email|default:'' }}" required></label>
+            <label class="field"><span>Password</span>
+                <input class="input" type="password" name="pwd" required></label>
+            <button class="btn block" type="submit">Sign up</button>
+        </form>
+        <p class="auth-footer">Already have an account? <a href="{% url 'login' %}">Log in</a></p>
+    </div>
+</main>
+{% endblock %}

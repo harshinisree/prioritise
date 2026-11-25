@@ -1,0 +1,4 @@
+<nav class="view-switch" aria-label="Calendar view">
+    <a href="{% url 'calendar' %}?month={{ day|date:'Y-m' }}&amp;day={{ day|date:'Y-m-d' }}"{% if mode == 'month' %} class="on" aria-current="page"{% endif %}>Month</a>
+    <a href="{% url 'calendar' %}?view=week&amp;day={{ day|date:'Y-m-d' }}"{% if mode == 'week' %} class="on" aria-current="page"{% endif %}>Week</a>
+</nav>

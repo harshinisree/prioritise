@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}{{ category.name }} · Prioritise{% endblock %}
+{% block content %}
+<div class="app">
+    <a class="back" href="{% url 'lists' %}">{% include 'icon.html' with name='back' %}All lists</a>
+
+    <div class="list-hero" style="--c: {{ category.color }}">
+        <h1>{{ category.name }}</h1>
+        <p>{{ tasks|length }} task{{ tasks|length|pluralize }} · {{ completed }} completed</p>
+        <div class="progress"><span style="width: {% widthratio completed tasks|length|default:1 100 %}%"></span></div>
+    </div>
+
+    <div class="card">
+        <div class="list wide">
+            {% for t in tasks %}
+                {% include '_task.html' with show_date=True %}
+            {% empty %}
+                <div class="empty">No tasks in {{ category.name }} yet.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% include '_nav.html' with active='lists' %}
+</div>
+{% endblock %}

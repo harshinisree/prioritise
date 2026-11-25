@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% block title %}Calendar · Prioritise{% endblock %}
+{% block content %}
+<div class="app">
+{% if mode == 'month' %}
+    <header class="cal-head">
+        <div class="cal-title">
+            <h1>{{ month|date:"F Y" }}</h1>
+            <a class="icon-btn" href="?month={{ prev_month|date:'Y-m' }}" aria-label="Previous month">{% include 'icon.html' with name='left' %}</a>
+            <a class="icon-btn" href="?month={{ next_month|date:'Y-m' }}" aria-label="Next month">{% include 'icon.html' with name='right' %}</a>
+        </div>
+        <div class="cal-tools">
+            <a class="btn ghost today-btn" href="?month={{ today|date:'Y-m' }}&amp;day={{ today|date:'Y-m-d' }}">Today</a>
+            {% include '_cal_switch.html' %}
+            <a class="btn desk-only" href="{% url 'todo' %}?add=1" data-open-add>{% include 'icon.html' with name='plus' %}New task</a>
+        </div>
+    </header>
+
+    <div class="month-layout">
+        {% comment %}
+            The month grid. Each cell is a link that selects its day. Cells list up to 3 task chips
+            (on narrow screens CSS turns them into coloured dots) and "+N more".
+            data-task / data-day let app.js strike a chip through when its row is ticked below.
+        {% endcomment %}
+        <section class="month" aria-label="{{ month|date:'F Y' }}">
+            <div class="month-weekdays" aria-hidden="true">{% for w in weekdays %}<span>{{ w }}</span>{% endfor %}</div>
+            <div class="month-grid">
+                {% for week in grid %}{% for c in week %}
+                <a class="cell{% if not c.in_month %} out{% endif %}{% if c.is_today %} today{% endif %}{% if c.selected %} selected{% endif %}"
+                   href="?month={{ month|date:'Y-m' }}&amp;day={{ c.date|date:'Y-m-d' }}"
+                   aria-label="{{ c.date|date:'l j F' }}, {{ c.total }} task{{ c.total|pluralize }}"{% if c.selected %} aria-current="date"{% endif %}>
+                    <span class="cell-num">{{ c.date.day }}</span>
+                    {% if c.total %}
+                    <span class="cell-tasks" aria-hidden="true">
+                        {% for ch in c.chips %}<span class="chip-t{% if ch.done %} done{% endif %}" style="--c: {{ ch.color }}" title="{{ ch.title }}" data-task="{{ ch.id }}" data-day="{{ c.date|date:'Y-m-d' }}"{% if ch.repeat %} data-repeat="1"{% endif %}>{{ ch.title }}</span>{% endfor %}
+                        {% if c.more %}<span class="cell-more">+{{ c.more }}<span class="w"> more</span></span>{% endif %}
+                    </span>
+                    {% endif %}
+                </a>
+                {% endfor %}{% endfor %}
+            </div>
+        </section>
+
+        <aside class="day-panel" aria-label="Tasks on {{ day|date:'l j F' }}">
+            <div class="day-head">
+                <h2>{% if day == today %}Today{% else %}{{ day|date:"l" }}{% endif %}</h2>
+                <p class="muted">{{ day|date:"j F Y" }} · {{ day_total }} task{{ day_total|pluralize }}</p>
+            </div>
+            {% for g in groups %}
+            <h3 class="section with-icon">{% include 'icon.html' with name=g.icon %}{{ g.label }}</h3>
+            <div class="list">{% for t in g.tasks %}{% include '_task.html' %}{% endfor %}</div>
+            {% empty %}
+            <div class="empty">No tasks on this day. Tap + to plan something.</div>
+            {% endfor %}
+        </aside>
+    </div>
+{% else %}
+    <header class="page-head head-row">
+        <div>
+            <h1>{% if day == today %}Today{% else %}{{ day|date:"l" }}{% endif %}</h1>
+            <p class="muted">{{ day|date:"j F Y" }}</p>
+        </div>
+        <div class="cal-tools">
+            {% include '_cal_switch.html' %}
+            <a class="btn desk-only" href="{% url 'todo' %}?add=1" data-open-add>{% include 'icon.html' with name='plus' %}New task</a>
+        </div>
+    </header>
+
+    <div class="week">
+        <a class="week-nav" href="?view=week&amp;day={{ prev_week|date:'Y-m-d' }}" aria-label="Previous week">{% include 'icon.html' with name='left' %}</a>
+        {% for d in week %}
+        <a href="?view=week&amp;day={{ d.date|date:'Y-m-d' }}" class="day{% if d.date == day %} on{% endif %}{% if d.date == today %} is-today{% endif %}">
+            <small>{{ d.date|date:"D" }}</small>
+            <b>{{ d.date|date:"j" }}</b>
+            {% if d.busy %}<i class="busy"></i>{% endif %}
+        </a>
+        {% endfor %}
+        <a class="week-nav" href="?view=week&amp;day={{ next_week|date:'Y-m-d' }}" aria-label="Next week">{% include 'icon.html' with name='right' %}</a>
+    </div>
+
+    {% if groups %}
+    {% comment %}
+       Morning / Afternoon / Evening: three columns on desktop, one long list on mobile.
+       The view only sends groups that have tasks, so each column looks its group up by label;
+       the "Nothing planned" box is shown by CSS only when the column has no list.
+    {% endcomment %}
+    <div class="cols">
+        <section class="col">
+            <h2 class="section with-icon">{% include 'icon.html' with name='sunrise' %}Morning</h2>
+            {% for g in groups %}{% if g.label == 'Morning' %}<div class="list">{% for t in g.tasks %}{% include '_task.html' %}{% endfor %}</div>{% endif %}{% endfor %}
+            <div class="empty col-empty">Nothing planned</div>
+        </section>
+        <section class="col">
+            <h2 class="section with-icon">{% include 'icon.html' with name='sun' %}Afternoon</h2>
+            {% for g in groups %}{% if g.label == 'Afternoon' %}<div class="list">{% for t in g.tasks %}{% include '_task.html' %}{% endfor %}</div>{% endif %}{% endfor %}
+            <div class="empty col-empty">Nothing planned</div>
+        </section>
+        <section class="col">
+            <h2 class="section with-icon">{% include 'icon.html' with name='moon' %}Evening</h2>
+            {% for g in groups %}{% if g.label == 'Evening' %}<div class="list">{% for t in g.tasks %}{% include '_task.html' %}{% endfor %}</div>{% endif %}{% endfor %}
+            <div class="empty col-empty">Nothing planned</div>
+        </section>
+    </div>
+
+    {% for g in groups %}{% if g.label == 'Anytime' %}
+    <section class="col anytime">
+        <h2 class="section with-icon">{% include 'icon.html' with name=g.icon %}{{ g.label }}</h2>
+        <div class="list">{% for t in g.tasks %}{% include '_task.html' %}{% endfor %}</div>
+    </section>
+    {% endif %}{% endfor %}
+    {% else %}
+    <div class="empty roomy">No tasks on this day. Tap + to plan something.</div>
+    {% endif %}
+{% endif %}
+
+    {% include '_nav.html' with active='calendar' %}
+</div>
+{% include '_add_sheet.html' %}
+{% endblock %}
